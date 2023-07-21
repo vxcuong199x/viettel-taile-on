@@ -6,7 +6,14 @@ const _ = require('lodash');
 
 const md5 = require('md5');
 const TELCO_CONFIG = require('../config/telcoConfig');
-const { SERVER_APP, PAYGATE_SERVICE } = TELCO_CONFIG
+const { SERVER_APP, PAYGATE_SERVICE, USER_SERVICE } = TELCO_CONFIG
+const STATUS_USER_SERVICE = {
+  SUCCESS: 0,
+  USER_NOT_FOUND: 4002,
+  USER_EXISTED: 4007
+}
+
+
 const helper = require('../common/helper');
 const paymentApi = require('../common/paymentApi');
 const { redis } = require('./connector')
@@ -85,27 +92,32 @@ callApi.buyContent = (params, again = 0) => {
 callApi.createUser = (params, again = 0) => {
   const dataApi = {
     username: params.account,
-    password: params.password.toString(),
-    signature: md5(params.account + '|' + params.password + '|' + TELCO_CONFIG.SERVER_APP.SECRET),
-  };
-  const url = TELCO_CONFIG.SERVER_APP.BASE_URL + TELCO_CONFIG.SERVER_APP.API.createUser;
+    password: params.password.toString()
+  }
 
-  helper.console('createUser', 'dataApi', url, dataApi);
-
-  return axios.post(
+  const url = USER_SERVICE.BASE_URL + USER_SERVICE.API.CREATE_USER
+  const opts = {
     url,
-    dataApi,
+    method: 'POST',
+    data: dataApi,
     headers,
     timeout
-  ).then(res => {
-    helper.console('SUCCESS', 'createUser', dataApi, res.data);
+  }
 
-    return Promise.resolve({
-      url,
-      dataApi,
-      resApi: res.data
-    });
-  })
+  helper.console('createUser', 'dataApi', JSON.stringify(opts));
+  return axios(opts)
+    .then(({ data }) => {
+      helper.console('SUCCESS', 'createUser', dataApi, JSON.stringify(data));
+
+      const rsLast = formatDataCreateUser(data)
+      helper.console('SUCCESS', 'createUser_rsLast', JSON.stringify(rsLast));
+
+      return Promise.resolve({
+        url,
+        dataApi,
+        resApi: rsLast
+      });
+    })
     .catch(err => {
       helper.error('createUser', 'createUser', err);
       const resMessage = `createUser: ${(err.stack || err).substr(0, 100)}`;
@@ -124,33 +136,15 @@ callApi.createUser = (params, again = 0) => {
         });
     });
 };
+
 callApi.checkUser = (params, again = 0) => {
   let opts;
 
-  if (!params.hasBuyFilm && PAYGATE_SERVICE.PHONES_TEST.includes(params.account)) {
-    opts = {
-      url: PAYGATE_SERVICE.BASE_URL + PAYGATE_SERVICE.API.checkUser,
-      method: 'POST',
-      data: {
-        "username": params.account,
-        "msisdn": params.msisdn,
-        "mo": (params.mo || '').trim().toUpperCase(),
-        "cpCode": null,
-        "gameCode": null,
-        "packageCode": (params.packageCode || '').trim().toUpperCase(),
-        "amount": params.amount,
-        "logTime": moment(params.eventTime).toDate(),
-        "partner": PAYGATE_SERVICE.PARTNER_ID
-      }
-    }
-  } else {
-    opts = {
-      url: SERVER_APP.BASE_URL + SERVER_APP.API.checkUser,
-      method: 'GET',
-      params: {
-        username: params.account,
-        signature: md5(params.account + '|' + SERVER_APP.SECRET),
-      }
+  opts = {
+    url: USER_SERVICE.BASE_URL + USER_SERVICE.API.CHECK_USER,
+    method: 'GET',
+    params: {
+      phone: params.account
     }
   }
 
@@ -160,10 +154,13 @@ callApi.checkUser = (params, again = 0) => {
     .then(({ data }) => {
       helper.console('SUCCESS', 'checkUser', JSON.stringify(opts), JSON.stringify(data));
 
+      const rsLast = formatDataGetUser(data)
+      helper.console('SUCCESS', 'checkUser_rsLast', JSON.stringify(rsLast));
+
       return Promise.resolve({
         url: opts.url,
         dataApi: opts.data || opts.params,
-        resApi: data
+        resApi: rsLast
       });
     })
     .catch(err => {
@@ -338,5 +335,114 @@ callApi.addPackage = (params, ignoreRes = false, again = 0) => {
       }
     });
 };
+
+
+// old data:
+// "data": {
+//  "info": {
+//    "success": "true",
+//      "code": "1",
+//      "msg": "Tạo tài khoản thành công. Mã tài khoản của quý khách là : 25075322",
+//      "accountnumber": "25075322"
+//  }
+// }
+
+// new data
+// {
+//  "status": 0,
+//  "data": {
+//  "uid": "KT6C47HWRU",
+//    "username": "0946789312",
+//    "password": "12345Aa@"
+// },
+//  "message": "Success"
+// }
+
+function formatDataCreateUser (newData) {
+  let oldData = {}
+  const userInfo = _.get(newData, 'data') || {}
+
+  if (newData && +newData.status === STATUS_USER_SERVICE.SUCCESS) { // success
+    oldData = {
+      info: Object.assign(
+        userInfo,
+        {
+          'success': 'true',
+          'code': 1,
+          'accountnumber': userInfo.uid
+        }
+      )
+    }
+  }
+
+  return oldData
+}
+
+// old data
+// {
+//  "info": {
+//  "uid": "8139446",
+//    "status": NumberInt("0"),
+//    "username": "0349609863",
+//    "packages": [
+//    {
+//      "username": "0349609863",
+//      "planId": NumberInt("1"),
+//      "screenId": NumberInt("1"),
+//      "maxLogin": NumberInt("5"),
+//      "maxScreen": NumberInt("1"),
+//      "expire": NumberInt("1644710883"),
+//      "amount": NumberInt("66000"),
+//      "planLimit": { },
+//      "updatedAt": "2021-07-16T03:11:11.870Z",
+//      "_id": "1",
+//      "code": "LYS024914814",
+//      "name": "Gói ON VIP",
+//      "deviceType": [
+//        NumberInt("1"),
+//        NumberInt("2"),
+//        NumberInt("3")
+//      ]
+//    },
+//    ]
+// }
+
+// new data
+// {
+//  "status": 0,
+//   "data": {
+// "userInfo": {
+//  "id": "MWC5ARRF59",
+//    "displayName": "0945789305",
+//    "avatar": "https://lh3.googleusercontent.com/a-/AOh14Gh3J0JECQ3UZ1bsUJwzHWKoPPtaLAZRF9M2ytn4Rw=s96-c",
+//    "dtId": null,
+//    "spId": null,
+//    "phone": "0945789305",
+//  },
+//  "message": "Success"
+// }
+
+function formatDataGetUser (newData) {
+  let oldData = {}
+  const userInfo = _.get(newData, 'data.userInfo') || {}
+
+  if (newData && +newData.status === STATUS_USER_SERVICE.SUCCESS) { // success
+    oldData = {
+      info: Object.assign(
+        userInfo,
+        {
+          'status': 0,
+          uid: userInfo.id,
+          username: userInfo.phone
+        }
+      )
+    }
+  }
+
+  return oldData
+}
+
+//callApi.checkUser({ account: '0349609863' })
+//callApi.createUser({ account: '0349111222', password: '555555' })
 
 module.exports = callApi;

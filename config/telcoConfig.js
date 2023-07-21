@@ -1,4 +1,12 @@
 module.exports = {
+  USER_SERVICE: {
+    BASE_URL: process.env.USER_SERVICE_URL || 'http://user-app.vtvcab.local',//,'http://10.2.10.20:3015',
+    API: {
+      CHECK_USER: '/private-api/v1/users',
+      CREATE_USER: '/private-api/v1/users/create-user',
+      RESET_PASS: '/private-api/v1/users/reset-password'
+    }
+  },
   SERVER_APP: {
     BASE_URL: 'http://api3-onplay.gviet.vn',
     API: {
