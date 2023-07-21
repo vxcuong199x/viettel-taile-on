@@ -104,13 +104,13 @@ callApi.createUser = (params, again = 0) => {
     timeout
   }
 
-  helper.console('createUser', 'dataApi', JSON.stringify(opts));
+  helper.console('createUser', 'opts', JSON.stringify(opts));
   return axios(opts)
     .then(({ data }) => {
-      helper.console('SUCCESS', 'createUser', dataApi, JSON.stringify(data));
+      helper.console('SUCCESS', 'createUser', JSON.stringify(opts), JSON.stringify(data));
 
       const rsLast = formatDataCreateUser(data)
-      helper.console('SUCCESS', 'createUser_rsLast', JSON.stringify(rsLast));
+      helper.console('SUCCESS', 'createUser_rsLast', JSON.stringify(opts), JSON.stringify(rsLast));
 
       return Promise.resolve({
         url,
@@ -118,15 +118,27 @@ callApi.createUser = (params, again = 0) => {
         resApi: rsLast
       });
     })
-    .catch(err => {
-      helper.error('createUser', 'createUser', err);
-      const resMessage = `createUser: ${(err.stack || err).substr(0, 100)}`;
-      const condRetry = (resMessage.indexOf('timeout') > -1);
+    .catch(err_ => {
+      const isTimeout = checkTimoutRequest(err_)
+      const err = _.get(err_, 'response.data') || err_.stack || err_
+
+      helper.error('createUser', 'createUser_error', JSON.stringify(opts), JSON.stringify(err));
+      helper.console('createUser', 'createUser_error', JSON.stringify(opts), JSON.stringify(err));
+      const resMessage = `createUser: ${JSON.stringify(err).substr(0, 100)}`;
 
       //retry
-      if (condRetry && again < 3) {
+      if (isTimeout && again < 3) {
         again++;
         return callApi.createUser(params, again);
+      } else if (_.has(err, 'status')) {
+        const rsLast = formatDataCreateUser(err)
+        helper.console('SUCCESS', 'createUser_rsLast_error', JSON.stringify(opts), JSON.stringify(rsLast));
+
+        return Promise.resolve({
+          url: opts.url,
+          dataApi: opts.data || opts.params,
+          resApi: rsLast
+        });
       }
       else
         return Promise.reject({
@@ -149,13 +161,12 @@ callApi.checkUser = (params, again = 0) => {
   }
 
   helper.console('checkUser', 'opts', JSON.stringify(opts));
-
   return axios(opts)
     .then(({ data }) => {
       helper.console('SUCCESS', 'checkUser', JSON.stringify(opts), JSON.stringify(data));
 
       const rsLast = formatDataGetUser(data)
-      helper.console('SUCCESS', 'checkUser_rsLast', JSON.stringify(rsLast));
+      helper.console('SUCCESS', 'checkUser_rsLast', JSON.stringify(opts), JSON.stringify(rsLast));
 
       return Promise.resolve({
         url: opts.url,
@@ -163,15 +174,27 @@ callApi.checkUser = (params, again = 0) => {
         resApi: rsLast
       });
     })
-    .catch(err => {
-      helper.error('checkUser', 'checkUser', err);
-      const resMessage = `checkUser: ${(err.stack || err).substr(0, 100)}`;
-      const condRetry = (resMessage.indexOf('timeout') > -1);
+    .catch(err_ => {
+      const isTimeout = checkTimoutRequest(err_)
+      const err = _.get(err_, 'response.data') || err_.stack || err_
+
+      helper.error('checkUser', 'checkUser_error', JSON.stringify(opts), JSON.stringify(err));
+      helper.console('checkUser', 'checkUser_error', JSON.stringify(opts), JSON.stringify(err));
+      const resMessage = `checkUser: ${JSON.stringify(err).substr(0, 100)}`;
 
       //retry
-      if (condRetry && again < 3) {
+      if (isTimeout && again < 3) {
         again++;
         return callApi.checkUser(params, again);
+      } else if (_.has(err, 'status')) {
+        const rsLast = formatDataGetUser(err)
+        helper.console('SUCCESS', 'checkUser_rsLast_error', JSON.stringify(opts), JSON.stringify(rsLast));
+
+        return Promise.resolve({
+          url: opts.url,
+          dataApi: opts.data || opts.params,
+          resApi: rsLast
+        });
       }
       else
         return Promise.reject({
@@ -442,7 +465,14 @@ function formatDataGetUser (newData) {
   return oldData
 }
 
-//callApi.checkUser({ account: '0349609863' })
-//callApi.createUser({ account: '0349111222', password: '555555' })
+function checkTimoutRequest (error) {
+  const statusCode = +_.get(error, 'response.status')
+  const isTimeout = [408, 504].includes(statusCode)
+
+  return isTimeout
+}
+
+//callApi.checkUser({ account: '0349111223' })
+//callApi.createUser({ account: '0349111221', password: '555555' })
 
 module.exports = callApi;
