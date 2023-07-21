@@ -1,0 +1,17 @@
+[
+  {
+    "name": "onviettel_taile",
+    "script": "app.js",
+    "error_file": "./logs/onviettel_taile-err.log",
+    "out_file": "./logs/onviettel_taile-out.log",
+    "pid_file": "./logs/onviettel_taile.pid",
+    "exec_mode": "cluster_mode",
+    "instances": 4,
+    "log_date_format": "YYYY-MM-DD HH:mm Z",
+    "watch": false,
+    "env": {
+      "PORT": 8001,
+      "NODE_ENV": "production"
+    }
+  }
+]

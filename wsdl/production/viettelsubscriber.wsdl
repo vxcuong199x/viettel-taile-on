@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+name="sms_sub_listener_mo"
+xmlns:tns="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service"
+xmlns:loc="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local"
+targetNamespace="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service">
+<wsdl:types>
+	<xsd:schema elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local">
+		<xsd:element name="eleSubRequest" type="loc:eleSubRequest"/>
+		<xsd:complexType name="eleSubRequest">
+			<xsd:sequence>
+				<xsd:element name="username" type="xsd:string"/>
+				<xsd:element name="password" type="xsd:string"/>
+				<xsd:element name="serviceid" type="xsd:string"/>
+				<xsd:element name="msisdn" type="xsd:string"/>
+				<xsd:element name="chargetime" type="xsd:string"/>
+				<xsd:element name="params" type="xsd:int"/>
+				<xsd:element name="mode" type="xsd:string"/>
+				<xsd:element name="amount" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="command" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			</xsd:sequence>
+		</xsd:complexType>
+
+		<xsd:element name="eleSubResponse" type="loc:eleSubResponse"/>
+		<xsd:complexType name="eleSubResponse">
+			<xsd:sequence>
+				<xsd:element name="result" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+  	</xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="subRequest">
+		<wsdl:part name="parameters" element="loc:eleSubRequest"/>
+	</wsdl:message>
+	<wsdl:message name="subRequestResponse">
+		<wsdl:part name="result" element="loc:eleSubResponse"/>
+	</wsdl:message>
+
+  <wsdl:portType name="SubPortType">
+	<wsdl:operation name="subRequest">
+		<wsdl:input message="tns:subRequest"/>
+		<wsdl:output message="tns:subRequestResponse"/>
+	</wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="SubBinding" type="tns:SubPortType">
+	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="subRequest">
+      <soap:operation soapAction="subRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SubService">
+    <wsdl:port name="SubPort" binding="tns:SubBinding">
+      <soap:address location="http://210.211.99.118:8003/subscribe" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

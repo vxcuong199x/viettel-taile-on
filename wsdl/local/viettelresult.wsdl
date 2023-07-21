@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+name="sms_sub_result"
+xmlns:tns="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service"
+xmlns:loc="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local"
+targetNamespace="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service">
+<wsdl:types>
+	<xsd:schema elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local">
+		<xsd:element name="eleResultRequest" type="loc:eleResultRequest"/>
+			<xsd:complexType name="eleResultRequest">
+				<xsd:sequence>
+					<xsd:element name="username" type="xsd:string"/>
+					<xsd:element name="password" type="xsd:string"/>
+					<xsd:element name="serviceid" type="xsd:string"/>
+					<xsd:element name="chargetime" type="xsd:string"/>
+					<xsd:element name="msisdn" type="xsd:string"/>
+					<xsd:element name="params" type="xsd:string"/>
+					<xsd:element name="mode" type="xsd:string"/>
+					<xsd:element name="amount" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+					<xsd:element name="detail" type="xsd:string"/>
+					<xsd:element name="chargecode" type="xsd:string"/>
+					<xsd:element name="nextRenewalTime" type="xsd:string"/>
+				</xsd:sequence>
+		</xsd:complexType>
+
+		<xsd:element name="eleResultResponse" type="loc:eleResultResponse"/>
+		<xsd:complexType name="eleResultResponse">
+			<xsd:sequence>
+				<xsd:element name="result" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+  	</xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="resultRequest">
+		<wsdl:part name="parameters" element="loc:eleResultRequest"/>
+	</wsdl:message>
+	<wsdl:message name="resultRequestResponse">
+		<wsdl:part name="result" element="loc:eleResultResponse"/>
+	</wsdl:message>
+
+  <wsdl:portType name="ResultPortType">
+	<wsdl:operation name="resultRequest">
+		<wsdl:input message="tns:resultRequest"/>
+		<wsdl:output message="tns:resultRequestResponse"/>
+	</wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="ResultBinding" type="tns:ResultPortType">
+	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="resultRequest">
+      <soap:operation soapAction="resultRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ResultService">
+    <wsdl:port name="ResultPort" binding="tns:ResultBinding">
+      <soap:address location="http://127.0.0.1:8004/receiveresult" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

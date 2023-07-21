@@ -1,0 +1,15 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:loc="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <loc:eleContentRequest>
+         <loc:username>vtvcabon</loc:username>
+         <loc:password>vtvcabon@535</loc:password>
+         <loc:serviceid>VTVCABON</loc:serviceid>
+         <loc:msisdn>84349609850</loc:msisdn>
+         <loc:params>ON</loc:params>
+         <loc:mode>CHECK</loc:mode>
+         <!--Optional:-->
+         <loc:amount>66000</loc:amount>
+      </loc:eleContentRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

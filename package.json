@@ -1,0 +1,28 @@
+{
+  "name": "on-viettel-tai-le",
+  "private": true,
+  "author": "CuongVX",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "axios": "^0.19.0",
+    "bluebird": "^3.4.0",
+    "config": "^1.20.4",
+    "express": "*",
+    "khong-dau": "^2.0.0",
+    "lodash": "^4.13.1",
+    "md5": "^2.2.1",
+    "moment": "^2.24.0",
+    "mongodb": "^3.4.1",
+    "mysql": "^2.10.2",
+    "nodemailer": "^6.4.6",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "request-promise": "^3.0.0",
+    "sequelize": "^3.23.3",
+    "soap": "^0.15.0",
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "sinon": "^1.17.4",
+    "supertest": "^1.2.0"
+  }
+}

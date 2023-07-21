@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:tns="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service"
+name="sms_listener_9029"
+xmlns:loc="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local"
+targetNamespace="http://www.csapi.org/wsdl/parlayx/data/sync/v1_0/service">
+<wsdl:types>
+	<xsd:schema elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.csapi.org/schema/parlayx/data/sync/v1_0/local">
+		<xsd:element name="eleMoRequest" type="loc:eleMoRequest" />
+		<xsd:complexType name="eleMoRequest">
+			<xsd:sequence>
+				<xsd:element name="username" type="xsd:string"/>
+				<xsd:element name="password" type="xsd:string"/>
+				<xsd:element name="source" type="xsd:string"/>
+				<xsd:element name="dest" type="xsd:string"/>
+				<xsd:element name="content" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+
+		<xsd:element name="eleMoResponse" type="loc:eleMoResponse" />
+		<xsd:complexType name="eleMoResponse">
+			<xsd:sequence>
+				<xsd:element name="result" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+  	</xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="moRequest">
+		<wsdl:part name="parameters" element="loc:eleMoRequest"/>
+	</wsdl:message>
+	<wsdl:message name="moRequestResponse">
+		<wsdl:part name="result" element="loc:eleMoResponse"/>
+	</wsdl:message>
+
+  <wsdl:portType name="MoPortType">
+	<wsdl:operation name="moRequest">
+		<wsdl:input message="tns:moRequest"/>
+		<wsdl:output message="tns:moRequestResponse"/>
+	</wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="MoBinding" type="tns:MoPortType">
+	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="moRequest">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MoService">
+    <wsdl:port name="MoPort" binding="tns:MoBinding">
+      <soap:address location="http://127.0.0.1:8400/molistener" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
